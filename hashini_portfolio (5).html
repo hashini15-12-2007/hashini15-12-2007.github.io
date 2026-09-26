@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hashini B — Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#081E33;
+    --navy:#0E3355;
+    --navy-panel:#0C2C49;
+    --grid-line:rgba(111,211,232,0.09);
+    --grid-line-major:rgba(111,211,232,0.16);
+    --ink:#EAF3F9;
+    --ink-dim:#9FBBD1;
+    --ink-faint:#5E85A3;
+    --cyan:#6FD3E8;
+    --orange:#FF7A45;
+    --rule:rgba(159,187,209,0.25);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--navy-deep);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+
+  /* ---------- Blueprint grid backdrop ---------- */
+  .grid-bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      repeating-linear-gradient(0deg, var(--grid-line-major) 0 1px, transparent 1px 160px),
+      repeating-linear-gradient(90deg, var(--grid-line-major) 0 1px, transparent 1px 160px),
+      repeating-linear-gradient(0deg, var(--grid-line) 0 1px, transparent 1px 40px),
+      repeating-linear-gradient(90deg, var(--grid-line) 0 1px, transparent 1px 40px);
+    background-color:var(--navy-deep);
+  }
+  .grid-bg::after{
+    content:"";
+    position:absolute; inset:0;
+    background:radial-gradient(ellipse 80% 55% at 50% 0%, rgba(14,51,85,0.55), transparent 65%);
+  }
+
+  /* ---------- Sheet frame (blueprint border) ---------- */
+  .frame{
+    position:fixed; inset:10px; z-index:40; pointer-events:none;
+    border:1px solid rgba(111,211,232,0.35);
+  }
+  .frame::before{
+    content:"";
+    position:absolute; inset:5px;
+    border:1px solid rgba(111,211,232,0.15);
+  }
+  .tick{position:fixed; z-index:41; width:22px; height:22px; pointer-events:none;}
+  .tick span{position:absolute; background:var(--cyan); opacity:0.65;}
+  .tick.tl{top:10px; left:10px;} .tick.tr{top:10px; right:10px;}
+  .tick.bl{bottom:10px; left:10px;} .tick.br{bottom:10px; right:10px;}
+  .tick span.h{width:12px; height:1px; top:0; left:0;}
+  .tick span.v{width:1px; height:12px; top:0; left:0;}
+  .tick.tr span.h,.tick.tr span.v{left:auto; right:0;}
+  .tick.bl span.h,.tick.bl span.v{top:auto; bottom:0;}
+  .tick.br span.h,.tick.br span.v{top:auto; bottom:0; left:auto; right:0;}
+
+  /* ---------- Top nav ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 34px;
+    background:rgba(8,30,51,0.78);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--rule);
+  }
+  .brand{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px; letter-spacing:0.12em;
+    color:var(--ink-dim);
+  }
+  .brand b{color:var(--cyan); font-weight:600;}
+  nav{display:flex; gap:26px; overflow-x:auto; scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav a{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px; letter-spacing:0.08em;
+    color:var(--ink-faint); text-decoration:none;
+    white-space:nowrap;
+    padding-bottom:4px;
+    border-bottom:1px solid transparent;
+    transition:color .25s ease, border-color .25s ease;
+  }
+  nav a:hover, nav a.active{color:var(--cyan); border-color:var(--cyan);}
+
+  main{position:relative; z-index:2;}
+  section{
+    max-width:1040px; margin:0 auto;
+    padding:100px 34px 40px;
+    position:relative;
+  }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px; letter-spacing:0.16em; color:var(--cyan);
+    display:flex; align-items:center; gap:10px;
+    margin-bottom:14px;
+  }
+  .eyebrow::before{content:""; width:26px; height:1px; background:var(--cyan);}
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif; font-weight:600; color:var(--ink);}
+
+  /* ---------- Hero ---------- */
+  .hero{min-height:96vh; display:flex; flex-direction:column; justify-content:center; padding-top:60px;}
+  .hero .kicker{
+    font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:0.18em;
+    color:var(--ink-faint); margin-bottom:22px;
+  }
+  .hero h1{
+    font-size:clamp(2.6rem, 8vw, 6.2rem);
+    line-height:0.98; letter-spacing:-0.01em;
+    opacity:0; animation:rise .9s ease forwards .15s;
+  }
+  .hero h1 span{color:var(--cyan);}
+  .hero .role{
+    margin-top:22px; font-size:clamp(1.05rem,2.4vw,1.35rem);
+    color:var(--ink-dim); max-width:640px; font-weight:500;
+    opacity:0; animation:rise .9s ease forwards .35s;
+  }
+  .hero p.desc{
+    margin-top:20px; max-width:560px; color:var(--ink-dim); line-height:1.7; font-size:15.5px;
+    opacity:0; animation:rise .9s ease forwards .5s;
+  }
+  @keyframes rise{from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:translateY(0);}}
+
+  .hero-cta{margin-top:34px; display:flex; gap:14px; flex-wrap:wrap; opacity:0; animation:rise .9s ease forwards .65s;}
+  .btn{
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; letter-spacing:0.06em;
+    padding:13px 22px; text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+    border:1px solid var(--cyan); color:var(--cyan); transition:all .25s ease;
+  }
+  .btn:hover{background:var(--cyan); color:var(--navy-deep);}
+  .btn.solid{background:var(--orange); border-color:var(--orange); color:var(--navy-deep); font-weight:600;}
+  .btn.solid:hover{background:transparent; color:var(--orange);}
+
+  /* crosshair markers scattered in hero */
+  .xmark{position:absolute; width:16px; height:16px; opacity:.55;}
+  .xmark::before,.xmark::after{content:""; position:absolute; background:var(--ink-faint);}
+  .xmark::before{width:100%; height:1px; top:50%;}
+  .xmark::after{width:1px; height:100%; left:50%;}
+
+  /* ---------- Section headers ---------- */
+  .sheet-head{
+    display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:12px;
+    border-bottom:1px solid var(--rule); padding-bottom:18px; margin-bottom:40px;
+  }
+  .sheet-head h2{font-size:clamp(1.7rem,3.6vw,2.4rem);}
+  .sheet-no{font-family:'IBM Plex Mono',monospace; color:var(--ink-faint); font-size:12.5px; letter-spacing:0.1em;}
+
+  .reveal{opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in{opacity:1; transform:translateY(0);}
+
+  /* ---------- About / summary ---------- */
+  .about-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:50px;}
+  .about-grid p{color:var(--ink-dim); line-height:1.85; font-size:15.5px;}
+  .about-grid p strong{color:var(--ink); font-weight:600;}
+  .specs{border:1px solid var(--rule); padding:22px;}
+  .specs h4{font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:0.12em; color:var(--cyan); margin-bottom:16px;}
+  .spec-row{display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px dashed var(--rule); font-size:13.5px;}
+  .spec-row:last-child{border-bottom:none;}
+  .spec-row span:first-child{color:var(--ink-faint); font-family:'IBM Plex Mono',monospace; font-size:11.5px;}
+  .spec-row span:last-child{color:var(--ink); text-align:right;}
+
+  /* ---------- Skills / legend ---------- */
+  .legend{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--rule); border:1px solid var(--rule);}
+  .legend-item{background:var(--navy-deep); padding:26px 22px; min-height:170px; display:flex; flex-direction:column; gap:14px;}
+  .legend-item .sym{width:34px; height:34px; border:1px solid var(--cyan); display:flex; align-items:center; justify-content:center; color:var(--cyan); font-family:'IBM Plex Mono',monospace; font-size:13px;}
+  .legend-item h4{font-family:'Space Grotesk',sans-serif; font-size:15px; color:var(--ink); font-weight:600;}
+  .legend-item ul{list-style:none; display:flex; flex-direction:column; gap:6px;}
+  .legend-item li{font-size:13.5px; color:var(--ink-dim); font-family:'IBM Plex Mono',monospace;}
+  .legend-item li::before{content:"— "; color:var(--ink-faint);}
+
+  /* ---------- Projects ---------- */
+  .project{border:1px solid var(--rule); margin-bottom:26px; padding:30px; position:relative;}
+  .project .tag{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.1em;
+    color:var(--orange); border:1px solid var(--orange); padding:3px 9px; display:inline-block; margin-bottom:14px;
+  }
+  .project h3{font-size:1.5rem; margin-bottom:8px;}
+  .project .sub{color:var(--ink-faint); font-size:13px; font-style:italic; margin-bottom:16px;}
+  .project ul{list-style:none; color:var(--ink-dim); font-size:14.5px; line-height:1.9;}
+  .project ul li{padding-left:18px; position:relative;}
+  .project ul li::before{content:"›"; position:absolute; left:0; color:var(--cyan);}
+
+  .schematic{margin-top:22px; border-top:1px dashed var(--rule); padding-top:22px;}
+  .schematic svg{width:100%; height:auto; display:block;}
+
+  /* ---------- Achievements timeline ---------- */
+  .timeline{position:relative; padding-left:32px;}
+  .timeline::before{content:""; position:absolute; left:5px; top:6px; bottom:6px; width:1px; background:var(--rule);}
+  .tl-item{position:relative; padding-bottom:34px;}
+  .tl-item:last-child{padding-bottom:0;}
+  .tl-item::before{
+    content:""; position:absolute; left:-32px; top:4px; width:11px; height:11px;
+    border:1px solid var(--cyan); background:var(--navy-deep); transform:rotate(45deg);
+  }
+  .tl-item .badge{
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.08em;
+    color:var(--navy-deep); background:var(--cyan); padding:2px 8px; display:inline-block; margin-bottom:10px; font-weight:600;
+  }
+  .tl-item h3{font-size:1.15rem; margin-bottom:6px;}
+  .tl-item .org{color:var(--ink-faint); font-size:13px; margin-bottom:8px; line-height:1.6;}
+  .tl-item p.result{color:var(--ink-dim); font-size:14px;}
+
+  /* ---------- Education ---------- */
+  .edu-item{display:grid; grid-template-columns:150px 1fr; gap:24px; padding:20px 0; border-bottom:1px solid var(--rule);}
+  .edu-item:last-child{border-bottom:none;}
+  .edu-item .yr{font-family:'IBM Plex Mono',monospace; color:var(--cyan); font-size:13px;}
+  .edu-item h3{font-size:1.1rem; margin-bottom:6px;}
+  .edu-item p{color:var(--ink-faint); font-size:13.5px;}
+  .edu-item .score{color:var(--orange); font-family:'IBM Plex Mono',monospace; font-size:12.5px; margin-top:6px; display:inline-block;}
+
+  /* ---------- Contact ---------- */
+  .contact-wrap{border:1px solid var(--rule); padding:44px; text-align:center;}
+  .contact-wrap h2{font-size:clamp(1.8rem,4vw,2.6rem); margin-bottom:16px;}
+  .contact-wrap p{color:var(--ink-dim); max-width:480px; margin:0 auto 30px; font-size:15px; line-height:1.7;}
+  .contact-links{display:flex; gap:16px; justify-content:center; flex-wrap:wrap;}
+
+  /* ---------- Title block (footer) ---------- */
+  footer{padding:60px 34px 90px;}
+  .title-block{
+    max-width:1040px; margin:0 auto; border:1px solid var(--rule);
+    display:grid; grid-template-columns:repeat(4,1fr);
+  }
+  .tb-cell{padding:16px 18px; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule);}
+  .tb-cell:nth-child(4n){border-right:none;}
+  .tb-cell .k{font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.1em; color:var(--ink-faint); margin-bottom:6px;}
+  .tb-cell .v{font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--ink);}
+  .tb-full{grid-column:1/-1; border-right:none;}
+
+  @media (max-width:760px){
+    .about-grid{grid-template-columns:1fr;}
+    .legend{grid-template-columns:1fr;}
+    .edu-item{grid-template-columns:1fr; gap:6px;}
+    header{padding:14px 18px;}
+    section{padding:70px 18px 30px;}
+    .title-block{grid-template-columns:1fr 1fr;}
+    .tb-cell:nth-child(4n){border-right:1px solid var(--rule);}
+    .tb-cell:nth-child(2n){border-right:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="frame"></div>
+<div class="tick tl"><span class="h"></span><span class="v"></span></div>
+<div class="tick tr"><span class="h"></span><span class="v"></span></div>
+<div class="tick bl"><span class="h"></span><span class="v"></span></div>
+<div class="tick br"><span class="h"></span><span class="v"></span></div>
+
+<header>
+  <div class="brand">HASHINI&nbsp;B <b>//</b> PORTFOLIO&nbsp;REV.2026</div>
+  <nav id="nav">
+    <a href="#profile" class="active">01 PROFILE</a>
+    <a href="#skills">02 SKILLS</a>
+    <a href="#projects">03 PROJECTS</a>
+    <a href="#achievements">04 ACHIEVEMENTS</a>
+    <a href="#education">05 EDUCATION</a>
+    <a href="#contact">06 CONTACT</a>
+  </nav>
+</header>
+
+<main>
+
+  <section id="profile" class="hero">
+    <div class="kicker">SHEET 01 — PROFILE &nbsp;|&nbsp; SRM VALLIAMMAI ENGINEERING COLLEGE</div>
+    <h1>HASHINI&nbsp;B<span>.</span></h1>
+    <p class="role">Computer Science &amp; Engineering Student — building safety-focused software and hardware-adjacent systems.</p>
+    <p class="desc">Second-year CS &amp; Engineering student with a foundation in Python, HTML, CSS and Microsoft Excel. I work at the intersection of software and real-world problems — from a lost-pet locator app to an AI/IoT early-warning system for factory floor safety — and I'm looking for an internship where I can keep building things that matter.</p>
+    <div class="hero-cta">
+      <a class="btn solid" href="#projects">VIEW PROJECTS ↓</a>
+      <a class="btn" href="#contact">GET IN TOUCH →</a>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="sheet-head reveal">
+      <h2>Summary</h2>
+      <span class="sheet-no">SHEET 01.2</span>
+    </div>
+    <div class="about-grid reveal">
+      <p>
+        I'm a second-year <strong>Computer Science &amp; Engineering</strong> student at SRM Valliammai Engineering College,
+        passionate about software development and emerging technologies. My work so far spans
+        <strong>academic projects</strong>, a <strong>full-stack web development certification</strong>, and multiple
+        <strong>hackathons and technical symposiums</strong> — each one pushing me to apply classroom concepts to
+        problems that have a real audience. I'm eager to bring that same curiosity into an internship, where I can
+        grow into a stronger software engineer while contributing to real product work.
+      </p>
+      <div class="specs">
+        <h4>QUICK SPECS</h4>
+        <div class="spec-row"><span>PROGRAM</span><span>B.E. CSE, 2025–29</span></div>
+        <div class="spec-row"><span>LOCATION</span><span>Tamil Nadu, India</span></div>
+        <div class="spec-row"><span>LANGUAGES</span><span>English, Tamil</span></div>
+        <div class="spec-row"><span>FOCUS</span><span>Web Dev · AI/IoT</span></div>
+        <div class="spec-row"><span>STATUS</span><span style="color:var(--cyan)">Open to internships</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="sheet-head reveal">
+      <h2>Skills Legend</h2>
+      <span class="sheet-no">SHEET 02</span>
+    </div>
+    <div class="legend reveal">
+      <div class="legend-item">
+        <div class="sym">&lt;/&gt;</div>
+        <h4>Languages</h4>
+        <ul><li>Python (Basic)</li><li>HTML</li><li>CSS</li></ul>
+      </div>
+      <div class="legend-item">
+        <div class="sym">⌘</div>
+        <h4>Tools</h4>
+        <ul><li>Microsoft Excel</li><li>Microsoft Word</li><li>Microsoft PowerPoint</li></ul>
+      </div>
+      <div class="legend-item">
+        <div class="sym">△</div>
+        <h4>Core Concepts</h4>
+        <ul><li>Basic Data Structures</li><li>Responsive Web Design</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="sheet-head reveal">
+      <h2>Projects</h2>
+      <span class="sheet-no">SHEET 03</span>
+    </div>
+
+    <div class="project reveal">
+      <span class="tag">ACADEMIC MINI PROJECT</span>
+      <h3>Pet Finder App</h3>
+      <ul>
+        <li>Designed a web application concept to help users locate and reconnect with lost pets.</li>
+        <li>Built basic front-end pages using HTML and CSS.</li>
+        <li>Collaborated with teammates through planning and implementation.</li>
+      </ul>
+    </div>
+
+    <div class="project reveal">
+      <span class="tag">MEMS HACKATHON 6.0 — APPLIED</span>
+      <h3>AI-SHIELD</h3>
+      <div class="sub">AI &amp; IoT-based real-time worker safety and machine-risk early-warning system for small welding &amp; fabrication MSME units</div>
+      <ul>
+        <li>Proposed an AI and IoT-based solution for monitoring workplace safety.</li>
+        <li>Focused the design on real-time risk detection and early-warning alerts.</li>
+        <li>Aimed at improving worker safety in small manufacturing environments.</li>
+      </ul>
+      <div class="schematic">
+        <svg viewBox="0 0 900 150" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="#6FD3E8" stroke-width="1" opacity="0.85">
+            <rect x="10" y="55" width="140" height="45"/>
+            <rect x="220" y="55" width="140" height="45"/>
+            <rect x="430" y="55" width="140" height="45"/>
+            <rect x="640" y="30" width="150" height="95"/>
+            <line x1="150" y1="77" x2="220" y2="77" stroke-dasharray="4 3"/>
+            <line x1="360" y1="77" x2="430" y2="77" stroke-dasharray="4 3"/>
+            <line x1="570" y1="77" x2="640" y2="77" stroke-dasharray="4 3"/>
+            <path d="M210 77 L220 73 L220 81 Z" fill="#6FD3E8" stroke="none"/>
+            <path d="M420 77 L430 73 L430 81 Z" fill="#6FD3E8" stroke="none"/>
+            <path d="M630 77 L640 73 L640 81 Z" fill="#6FD3E8" stroke="none"/>
+          </g>
+          <g font-family="IBM Plex Mono, monospace" font-size="11" fill="#9FBBD1">
+            <text x="80" y="35" text-anchor="middle">FLOOR SENSOR</text>
+            <text x="290" y="35" text-anchor="middle">IoT GATEWAY</text>
+            <text x="500" y="35" text-anchor="middle">RISK ENGINE</text>
+            <text x="715" y="20" text-anchor="middle">EARLY-WARNING</text>
+            <text x="715" y="34" text-anchor="middle">ALERT → WORKER</text>
+            <text x="80" y="115" text-anchor="middle" fill="#5E85A3">01</text>
+            <text x="290" y="115" text-anchor="middle" fill="#5E85A3">02</text>
+            <text x="500" y="115" text-anchor="middle" fill="#5E85A3">03</text>
+            <text x="715" y="140" text-anchor="middle" fill="#5E85A3">04</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section id="achievements">
+    <div class="sheet-head reveal">
+      <h2>Achievements &amp; Events</h2>
+      <span class="sheet-no">SHEET 04</span>
+    </div>
+    <div class="timeline reveal">
+      <div class="tl-item">
+        <span class="badge">CERTIFICATION</span>
+        <h3>Full Stack Web Development with AI</h3>
+        <div class="org">Internshala — HTML, CSS, Web Development Fundamentals, AI Integration Basics</div>
+      </div>
+      <div class="tl-item">
+        <span class="badge">PARTICIPANT</span>
+        <h3>Digital Horizon — Technical Event 2026</h3>
+        <div class="org">Dept. of Neural Networks, Institute of CSE, Saveetha Institute of Medical and Technical Sciences (SIMATS)</div>
+        <p class="result">Participated in the Coding Challenge and Paper Presentation tracks.</p>
+      </div>
+      <div class="tl-item">
+        <span class="badge">PARTICIPANT</span>
+        <h3>Idea Quest — "Imaging Today, Inventing Tomorrow"</h3>
+        <div class="org">Dept. of Networking and Communication, SRM Institute of Science and Technology</div>
+        <p class="result">Received a Certificate of Participation and a SanDisk 32GB pen drive.</p>
+      </div>
+      <div class="tl-item">
+        <span class="badge">PAPER PRESENTATION</span>
+        <h3>Research Summit — STRATA '26</h3>
+        <div class="org">National-level technical symposium · Dept. of AI &amp; Data Science, Loyola-ICAM College of Engineering and Technology</div>
+        <p class="result">Presented a paper and received a Certificate of Appreciation.</p>
+      </div>
+      <div class="tl-item">
+        <span class="badge">2ND PRIZE</span>
+        <h3>Debate — "Energy Storage Devices"</h3>
+        <div class="org">Catalysis Club, Dept. of Chemistry, SRM Valliammai Engineering College</div>
+        <p class="result">Secured 2nd Prize and received a Certificate of Appreciation.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="education">
+    <div class="sheet-head reveal">
+      <h2>Education</h2>
+      <span class="sheet-no">SHEET 05</span>
+    </div>
+    <div class="reveal">
+      <div class="edu-item">
+        <div class="yr">2025 — 2029<br>(Expected)</div>
+        <div>
+          <h3>B.E. Computer Science &amp; Engineering</h3>
+          <p>SRM Valliammai Engineering College</p>
+        </div>
+      </div>
+      <div class="edu-item">
+        <div class="yr">Class XII</div>
+        <div>
+          <h3>Higher Secondary — Bio-Maths</h3>
+          <p>Neelan Matriculation Higher Secondary School</p>
+          <span class="score">SCORE: 86%</span>
+        </div>
+      </div>
+      <div class="edu-item">
+        <div class="yr">Class X</div>
+        <div>
+          <h3>Secondary Education</h3>
+          <p>Neelan Matriculation Higher Secondary School</p>
+          <span class="score">SCORE: 91%</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="sheet-head reveal">
+      <h2>Contact</h2>
+      <span class="sheet-no">SHEET 06</span>
+    </div>
+    <div class="contact-wrap reveal">
+      <h2>Let's build something.</h2>
+      <p>Open to internship opportunities in software development. Reach out by email, phone, or LinkedIn — I reply quickly.</p>
+      <div class="contact-links">
+        <a class="btn solid" href="mailto:hashinibalasubramanian2007@gmail.com">EMAIL ME</a>
+        <a class="btn" href="https://www.linkedin.com/in/hashini-b-bab7533b6" target="_blank" rel="noopener">LINKEDIN ↗</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="title-block reveal">
+    <div class="tb-cell"><div class="k">DRAWN BY</div><div class="v">Hashini B</div></div>
+    <div class="tb-cell"><div class="k">SHEET</div><div class="v">06 OF 06</div></div>
+    <div class="tb-cell"><div class="k">SCALE</div><div class="v">1 : 1</div></div>
+    <div class="tb-cell"><div class="k">REV</div><div class="v">2026.01</div></div>
+    <div class="tb-cell tb-full"><div class="k">TITLE</div><div class="v">PORTFOLIO — COMPUTER SCIENCE &amp; ENGINEERING STUDENT, SRM VALLIAMMAI ENGINEERING COLLEGE</div></div>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:0.12});
+  revealEls.forEach(el=>io.observe(el));
+
+  // Active nav highlighting
+  const navLinks = document.querySelectorAll('#nav a');
+  const sections = Array.from(navLinks).map(a=>document.querySelector(a.getAttribute('href')));
+  const navIO = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      const idx = sections.indexOf(entry.target);
+      if(idx === -1) return;
+      if(entry.isIntersecting){
+        navLinks.forEach(l=>l.classList.remove('active'));
+        navLinks[idx].classList.add('active');
+      }
+    });
+  }, {rootMargin:'-40% 0px -50% 0px'});
+  sections.forEach(s=>{ if(s) navIO.observe(s); });
+</script>
+
+</body>
+</html>
